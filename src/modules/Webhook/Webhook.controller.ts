@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Logger, Post } from '@nestjs/common';
 import { IdeasService } from 'src/modules/Ideas/services';
 
 @Controller("webhook")
@@ -6,10 +6,13 @@ export class WebhookController {
   constructor(
     private readonly IdeasService: IdeasService
   ) {}
+
+  private readonly logger = new Logger(WebhookController.name);
   
   @Post("idea")
   handleNewIdea(@Body() payload: any) {
-    console.log('payload:', payload);
+    this.logger.debug('Recieved new webhook payload:', payload);
+
     if (payload?.event_type == "form_response") {
       const answers = payload?.form_response?.answers ?? [];
       if (answers?.length < 4) return;
@@ -36,7 +39,7 @@ export class WebhookController {
         person,
       };
 
-      console.log('parsed idea:', idea);
+      this.logger.log('Added idea:', idea);
 
       // Adding this idea
       this.IdeasService.addNewIdea(idea);
@@ -46,7 +49,7 @@ export class WebhookController {
     };
   };
 
-  findAnswerById(answers: { id: string, text: string }[], id: string): string | null {
-    return answers.find((answer) => answer.id == id)?.text;
+  findAnswerById(answers: { text: string, field: { id: string } }[], id: string): string | null {
+    return answers.find((answer) => answer.field.id == id)?.text;
   };
 };
