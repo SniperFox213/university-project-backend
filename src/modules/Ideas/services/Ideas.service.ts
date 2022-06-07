@@ -5,8 +5,8 @@ import { ILocalIdea } from 'src/types';
 @Injectable()
 export class IdeasService {
   // "Database"
-  private ideas: ILocalIdea[];
-  private latestId: number = 0;
+  private ideas: ILocalIdea[] = [];
+  public latestId: number = 0;
   
   // Methods
   public getAllIdeas(): ILocalIdea[] {

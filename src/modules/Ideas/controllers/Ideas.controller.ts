@@ -8,7 +8,7 @@ export class IdeasController {
     private readonly IdeasService: IdeasService,
   ) {}
   
-  @Get()
+  @Get("new")
   new() {
     return {
       ideas: this.IdeasService.getNewIdeas()
