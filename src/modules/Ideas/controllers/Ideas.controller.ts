@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 
 import { IdeasService } from 'src/modules/Ideas/services';
 
@@ -13,5 +13,12 @@ export class IdeasController {
     return {
       ideas: this.IdeasService.getNewIdeas()
     }
+  };
+
+  @Post("setLastId")
+  setLastId(@Body() payload: { ideaId: number }) {
+    if (!payload?.ideaId) return;
+
+    this.IdeasService.setLatestIdeaId(payload.ideaId + 1);
   };
 };
