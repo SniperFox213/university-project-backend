@@ -9,15 +9,16 @@ export class WebhookController {
   
   @Post("idea")
   handleNewIdea(@Body() payload: any) {
+    console.log('payload:', payload);
     if (payload?.event_type == "form_response") {
-      const response = payload.form_response ?? {};
-      if (response.answers?.length < 4) return;
+      const answers = payload?.form_response?.answers ?? [];
+      if (answers?.length < 4) return;
 
       // Getting answers (hard-coded!!!)
-      const person = response.answers[0]?.text;
-      const title = response.answers[1]?.text;
-      const shortDescription = response.answers[2]?.text;
-      const description = response.answers[3]?.text;
+      const person = this.findAnswerById(answers, "RfVfj5xpikID");
+      const title = this.findAnswerById(answers, "NLTAPx2C3Fcn");
+      const shortDescription = this.findAnswerById(answers, "8i3UOxZr2jXD");
+      const description = this.findAnswerById(answers, "a4AvmWasehlj");
 
       // Checking if required fields exist
       if (!person || !description) return;
@@ -35,11 +36,17 @@ export class WebhookController {
         person,
       };
 
+      console.log('parsed idea:', idea);
+
       // Adding this idea
       this.IdeasService.addNewIdea(idea);
 
       // ...and then returning it
       return idea;
     };
+  };
+
+  findAnswerById(answers: { id: string, text: string }[], id: string): string | null {
+    return answers.find((answer) => answer.id == id)?.text;
   };
 };
