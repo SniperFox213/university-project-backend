@@ -1,73 +1,30 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Проєкт "Система для керування ідеями"
+Зовнішній веб-сервіс для зберігання та передачі інформації про нові ідеї з сервісу Typeform.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Архітектура
+Цей проєкт був створенний на базі бєкенд-фреймворку NestJS. Це максимально простий проєкт. Тут є усе непрофесійне: hard-coded обробка вебхуків; непрактичний метод зберігання інформації про те, які ідеї уже оброблені, дуже грязний Dockerfile, та, найголовніше, зберігання даних у оперативній пам'яті комп'ютера. Але це лише прототип, та, попрошу помітити, працюючий прототип.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+#### 🧱 IdeasModule `src/modules/Ideas`
+###### Зберігання інформації про список усіх ідей та про останню оброблену ідею.
+Модуль з одним REST контроллером, який обробляє один GET роут та один POST роут:
 
-## Description
+**GET** *http://host.com/ideas/new*
+Повертає об'єкт типу `{ ideas: [ { id: number, title: string, description: string, shortDescription: string, person: string } ] }`, в якому знаходиться список нових ідей. Про те, як система розпізнає нова ідея, чи ні, описано у кінці параграфу.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+**POST** *http://host.com/ideas/setLastId*
+Payload: `{ ideaId: number }`
 
-## Installation
+Запрос, який робиться через бізнес-процес у системі Creatio, який дає застосунку ID останньої обробленої ідеї. Саме за допомогою цього аргументу застосунок знає, яка ідея нова - а яка вже оброблена
 
-```bash
-$ npm install
-```
+##### ❓ Як веб-сервіс розуміє, яка ідея нова, а яка ні?
+У кожної ідеї є поле ID. Це поле інкрементується, тому найновіші ідеї завжди будуть с ID більшим чим старіші. У сервісі модуля IdeasModule є поле *latestIdeaId*, яке оновлюється POST методом */ideas/setLastId*. Саме за допомгою цього аргументу сервіс розуміє які нові ідеї повертати при GET запиті */ideas/new* - він просто відправляє усі ідеї, ID котрих більше ніж *latestIdeaId*
 
-## Running the app
+#### 🧱 WebhookModule `src/modules/Webhook`
+###### Обробка вебхука сервісу Typeform
 
-```bash
-# development
-$ npm run start
+Цей модуль має лише один REST контроллер з одним POST запитом:
 
-# watch mode
-$ npm run start:dev
+**POST** *http://host.com/webhook/idea*
+Payload: `{ ... }` (https://developer.typeform.com/webhooks/example-payload/)
 
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+Обробляє отриманий вебхук. У кожного поля у системі Typeform є унікальний ID, і цей сервіс використовує це для того, щоб отримати інформацію (Автор, назва, опис та таке інше), щоб потім створити новий об'єкт ідеї (ID у котрої інкрементується), та відправити її до модуля IdeasModule, який цю ідею обробляє та зберігає.
