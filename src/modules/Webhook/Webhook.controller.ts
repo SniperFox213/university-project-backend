@@ -13,26 +13,21 @@ export class WebhookController {
   handleNewIdea(@Body() payload: any) {
     this.logger.debug('Recieved new webhook payload:', payload);
 
-    if (payload?.event_type == "form_response") {
-      const answers = payload?.form_response?.answers ?? [];
+    if (payload?.eventType == "FORM_RESPONSE") {
+      const answers = payload?.data?.fields ?? [];
       if (answers?.length < 4) return;
 
       // Getting answers (hard-coded!!!)
-      const person = this.findAnswerById(answers, "RfVfj5xpikID");
-      const title = this.findAnswerById(answers, "NLTAPx2C3Fcn");
-      const shortDescription = this.findAnswerById(answers, "8i3UOxZr2jXD");
-      const description = this.findAnswerById(answers, "a4AvmWasehlj");
+      const person = this.findAnswerById(answers, "question_mKMyr7");
+      const title = this.findAnswerById(answers, "question_wLdyL1");
+      const shortDescription = this.findAnswerById(answers, "question_npL9pb");
+      const description = this.findAnswerById(answers, "question_31r5oW");
 
       // Checking if required fields exist
       if (!person || !description) return;
 
-      // Getting latest id
-      const allIdeas = this.IdeasService.getAllIdeas() ?? [];
-      const latestId = allIdeas[allIdeas.length - 1]?.id ?? 0;
-      
       // Creating new idea
-      const idea = { 
-        id: latestId + 1,
+      const idea = {
         title,
         description,
         shortDescription,
@@ -49,7 +44,7 @@ export class WebhookController {
     };
   };
 
-  findAnswerById(answers: { text: string, field: { id: string } }[], id: string): string | null {
-    return answers.find((answer) => answer.field.id == id)?.text;
+  findAnswerById(answers: { key: string, value: string }[], id: string): string | null {
+    return answers.find((answer) => answer.key == id)?.value;
   };
 };

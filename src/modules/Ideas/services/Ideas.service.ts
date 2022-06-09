@@ -25,7 +25,14 @@ export class IdeasService {
     this.latestId = id;
   };
   
-  public addNewIdea(idea: ILocalIdea) {
-    this.ideas.push(idea);
+  public addNewIdea(idea: Omit<ILocalIdea, 'id'>) {
+    // Getting latest id
+    const allIdeas = this.getAllIdeas() ?? [];
+    const latestId = allIdeas[allIdeas.length - 1]?.id ?? 0;
+    
+    this.ideas.push({
+      id: latestId + 1,
+      ...idea,
+    });
   };
 };
